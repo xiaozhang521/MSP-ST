@@ -1,0 +1,82 @@
+common:
+  fp16: true
+  log_format: json
+  log_interval: 200
+
+checkpoint:
+  no_epoch_checkpoints: true
+  best_checkpoint_metric: wer
+  keep_interval_updates: 5
+  save_interval: 1
+  save_interval_updates: 5000
+  save_dir: # path to save the model
+  #reset_optimizer: true
+
+task:
+  _name: adapter_pretraining
+  data:  #training_data_path
+  #fine_tuning: true
+  normalize: true
+  labels: wrd
+
+dataset:
+  num_workers: 4
+  max_tokens: 1000000
+  skip_invalid_size_inputs_valid_test: true
+  valid_subset: valid
+
+distributed_training:
+  ddp_backend: legacy_ddp
+  distributed_world_size: 8
+
+criterion:
+  _name: ctc_contrastive_beta_kd_loss
+  contrastive_alpha: 0.3
+  contrastive_beta: 1.0
+  contrastive_temperature: 0.1
+  zero_infinity: true
+  decrease_step: 5000
+  post_process: sentencepiece
+  is_shrink: uniq
+
+optimization:
+  max_update: 100000
+  lr: [0.0001]
+  update_freq: [4]
+  sentence_avg: true
+
+optimizer:
+  _name: adam
+  adam_betas: (0.9,0.98)
+  adam_eps: 1e-08
+
+lr_scheduler:
+  _name: tri_stage
+  phase_ratio: [0.1, 0.4, 0.5]
+  final_lr_scale: 0.05
+
+model:
+  _name: cmcl_adapter
+  w2v_path: #path_to_wav2vec2.0 or hubert
+  mbart_path: #path_to_pretrained_mbart
+  embed_path: #path_to_embedding_extracted_from_pretrained_mbart
+  apply_mask: true
+  mask_prob: 0.5
+  mask_channel_prob: 0.25
+  mask_channel_length: 64
+  layerdrop: 0.1
+  activation_dropout: 0.1
+  feature_grad_mult: 0.0
+  final_dropout: 0.1
+  use_ctc_loss: true
+  freeze_finetune_updates: 5000
+  freeze_modules: mbart_encoder
+  relative_attn: false
+  encoder_embed_dim: 1024
+  adapter_layers: 1
+  sead_layers: 1
+  macaron_style: true
+  use_cnn_module: true
+  add_position_embed: true
+  add_position_embed_after_ctc: true
+  conv_kernel_sizes: 5,5
