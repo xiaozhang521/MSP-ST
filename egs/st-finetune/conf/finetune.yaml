@@ -13,9 +13,9 @@ report-accuracy: True
 
 
 arch: s2t_w2v2_mabrt_sead_s
-adapter-model-path: # path to pretrained acoustic model 
-decoder-embed-path: #path to the pretrained embedding
-load-pretrain-decoder: #path to mt decoder model 
+adapter-model-path: # path to pretrained acoustic model （step 2）
+decoder-embed-path: #path to the pretrained embedding (step 1)
+load-pretrain-decoder: #path to mt decoder model (step 1)
 
 share-decoder-input-output-embed: True
 optimizer: adam
